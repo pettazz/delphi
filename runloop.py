@@ -23,7 +23,7 @@ def weather_updater(last_weather_check):
             res = requests.get(DARKSKY_FORECAST)
             if res.status_code == 200:
                 weather = json.loads(res.text)
-                logger.info("successfully fetched new weather: %s" % res.text[:100])
+                logger.info("successfully fetched new weather, timestamp: %s" % weather['currently']['time'])
         except Exception as e:
             logger.warning("failed to fetch weather, guess we'll try next tick")
             logger.warning(e)
@@ -32,7 +32,7 @@ def weather_updater(last_weather_check):
 
 def run(screen, background, weather):
     logger = logging.getLogger('runloop')
-
+    logger.info("hello")
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
