@@ -23,7 +23,7 @@ def weather_updater(last_weather_check):
             res = requests.get(DARKSKY_FORECAST)
             if res.status_code == 200:
                 weather = json.loads(res.text)
-                logger.info("successfully fetched new weather: %s" % weather[:100])
+                logger.info("successfully fetched new weather: %s" % res.text[:100])
         except Exception as e:
             logger.warning("failed to fetch weather, guess we'll try next tick")
             logger.warning(e)
