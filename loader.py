@@ -7,7 +7,7 @@ from hotreload import Loader
 
 if __name__ == "__main__":
   logging.basicConfig(filename='clocko.log',
-                      format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                      format='%(asctime)s %(name)s [%(levelname)s] %(message)s',
                       filemode='a',
                       level=logging.DEBUG)
   logger = logging.getLogger('main')
