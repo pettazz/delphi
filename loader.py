@@ -7,6 +7,7 @@ from hotreload import Loader
 
 if __name__ == "__main__":
   logging.basicConfig(filename='clocko.log',
+                      format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                       filemode='a',
                       level=logging.DEBUG)
   logger = logging.getLogger('main')
@@ -29,7 +30,7 @@ if __name__ == "__main__":
 
   while True:
     new_weather = script.weather_updater(last_weather_check)
-    if new_weather:
+    if new_weather is not None:
       last_weather_check = time.time()
       weather = new_weather
       logger.info("got new weather, set last check time to %s" % last_weather_check)

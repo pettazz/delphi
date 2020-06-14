@@ -26,6 +26,7 @@ def weather_updater(last_weather_check):
                 logger.info("successfully fetched new weather: %s" % weather[:100])
         except:
             logger.warning("failed to fetch weather, guess we'll try next tick")
+            logger.warning(res)
 
     return weather
 
