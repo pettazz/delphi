@@ -4,6 +4,7 @@ import pygame
 from pygame.locals import *
 
 
+BACKGROUND_INTERVAL = 300
 WEATHER_INTERVAL = 300
 DARKSKY_FORECAST = 'https://api.darksky.net/forecast/fd361ec0a4d4d24011a96cb6b47cd272/42.378920,-71.091040'
 WEATHER_ICON_MAP = {
@@ -31,11 +32,11 @@ def _textgen(screen, text, position, size, color, align, font):
     screen.blit(text, textpos)
 
 def text(screen, text, position, size, color, align="center"):
-    font = pygame.font.Font('/home/pi/Staatliches-Regular.ttf', size)
+    font = pygame.font.Font('assets/font/Staatliches-Regular.ttf', size)
     _textgen(screen, text, position, size, color, align, font)
 
 def fa_text(screen, name, position, size, color, align="center"):
-    font = pygame.font.Font('/home/pi/fa-solid-900.ttf', size)
+    font = pygame.font.Font('assets/font/fa-solid-900.ttf', size)
     _textgen(screen, fa.icons[name], position, size, color, align, font)
 
 def fullscreen_message(screen, message, color):

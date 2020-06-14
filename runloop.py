@@ -11,7 +11,7 @@ import requests
 import pygame
 from pygame.locals import *
 
-from statictools import *
+from statictools import * 
 
 def weather_updater(last_weather_check):
     logger = logging.getLogger('weather_updater')
@@ -30,15 +30,48 @@ def weather_updater(last_weather_check):
 
     return weather
 
-def run(screen, background, weather):
+def background_updater(last_background_update):
+    logger = logging.getLogger('background_updater')
+
+    SCREEN_WIDTH = 480
+    SCREEN_HEIGHT = 800
+
+    background_details = None
+
+    if time.time() - last_background_update > BACKGROUND_INTERVAL:
+        logger.info('updating background...')
+        img = pygame.image.load('assets/img/boston.jpg')
+        img_width, img_height = img.get_size()
+        if img_width < img_height:
+            new_width = SCREEN_WIDTH
+            new_height = (new_width * img_height) // img_width
+        else:
+            new_height = SCREEN_HEIGHT
+            new_width = (new_height * img_width) // img_height
+
+        background = pygame.transform.scale(img, (new_width, new_height))
+      
+        width_offset = (SCREEN_WIDTH // 2) - (new_width // 2)
+        height_offset = (SCREEN_HEIGHT // 2) - (new_height // 2)
+
+        background_details = {
+            "image": background,
+            "offset": (width_offset, height_offset)
+        }
+
+    return background_details
+
+def run(screen, weather, background):
     logger = logging.getLogger('runloop')
-    
+
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
+                logger.info("killed by ESC key, goodbye!")
                 sys.exit()
 
-    screen.blit(background, (-293, 0))
+    if background is not None:
+        screen.blit(background['image'], (background['offset'][0], background['offset'][1]))
 
     now_time = time.strftime("%I:%M")
     now_date = time.strftime("%A, %B %-d")

@@ -32,14 +32,14 @@ if __name__ == "__main__":
 
   pygame.mouse.set_visible(False)
 
-  img = pygame.image.load('/home/pi/botson.jpg')
-  background = pygame.transform.scale(img, (1066, 800))
-
   last_weather_check = 0
   weather = None
 
   last_git_check = 0
   git_repo = git.Repo(pathlib.Path(__file__).parent.absolute())
+
+  last_background_update = 0
+  background_details = None
 
   while True:
     if time.time() - last_git_check > GIT_REFRESH_INTERVAL:
@@ -54,6 +54,12 @@ if __name__ == "__main__":
       weather = new_weather
       logger.info("got new weather, set last check time to %s" % last_weather_check)
 
-    script.run(screen, background, weather)
+    new_bg = script.background_updater(last_background_update)
+    if new_bg is not None:
+      last_background_update = time.time()
+      background_details = new_bg
+      logger.info("updating background at %s" % last_background_update)
+
+    script.run(screen, weather, background_details)
 
     time.sleep(1)
