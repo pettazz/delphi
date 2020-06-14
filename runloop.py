@@ -32,7 +32,7 @@ def weather_updater(last_weather_check):
 
 def run(screen, background, weather):
     logger = logging.getLogger('runloop')
-    logger.info("hello")
+    
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:

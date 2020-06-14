@@ -38,8 +38,10 @@ if __name__ == "__main__":
 
   while True:
     if time.time() - last_git_check > GIT_REFRESH_INTERVAL:
+      logger.info("updating git repo...")
       git_repo.remotes.origin.pull()
       last_git_check = time.time()
+      logger.info("set last git pull to %s" %s)
 
     new_weather = script.weather_updater(last_weather_check)
     if new_weather is not None:
@@ -48,5 +50,5 @@ if __name__ == "__main__":
       logger.info("got new weather, set last check time to %s" % last_weather_check)
 
     script.run(screen, background, weather)
-    
+
     time.sleep(1)
