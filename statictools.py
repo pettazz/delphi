@@ -1,3 +1,9 @@
+import fontawesome as fa
+
+import pygame
+from pygame.locals import *
+
+
 WEATHER_INTERVAL = 300
 DARKSKY_FORECAST = 'https://api.darksky.net/forecast/fd361ec0a4d4d24011a96cb6b47cd272/42.378920,-71.091040'
 WEATHER_ICON_MAP = {

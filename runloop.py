@@ -9,7 +9,6 @@ import fontawesome as fa
 import requests
 
 import pygame
-from pygame import gfxdraw
 from pygame.locals import *
 
 from statictools import *
