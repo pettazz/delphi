@@ -3,6 +3,7 @@ import sys
 import time
 import os
 import json
+import random
 
 import fontawesome as fa
 
@@ -40,7 +41,11 @@ def background_updater(last_background_update):
 
     if time.time() - last_background_update > BACKGROUND_INTERVAL:
         logger.info('updating background...')
-        img = pygame.image.load('assets/img/boston.jpg')
+
+        backgrounds = [image for image in os.listdir(BACKGROUND_PATH) if image.endswith(".jpg")]
+        image_name = random.choice(backgrounds)
+        img = pygame.image.load(BACKGROUND_PATH + image_name)
+
         img_width, img_height = img.get_size()
         if img_width < img_height:
             new_width = SCREEN_WIDTH
@@ -58,6 +63,8 @@ def background_updater(last_background_update):
             "image": background,
             "offset": (width_offset, height_offset)
         }
+
+        logger.info('new background: %s (%sx%s) offset (%s, %s)' % (image_name, new_width, new_height, width_offset, height_offset))
 
     return background_details
 
