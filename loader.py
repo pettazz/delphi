@@ -6,6 +6,8 @@ import git
 
 import pygame
 
+from pyfiglet import Figlet
+
 from hotreload import Loader
 
 GIT_REFRESH_INTERVAL = 300
@@ -16,6 +18,9 @@ if __name__ == "__main__":
                       filemode='a',
                       level=logging.DEBUG)
   logger = logging.getLogger('main')
+  figl = Figlet(font='larry3d')
+  banner = figl.renderText("hello delphi")
+  logger.info("\n" + banner)
 
   script = Loader("runloop.py")
 

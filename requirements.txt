@@ -3,3 +3,4 @@ GitPython
 hotreload
 fontawesome
 requests
+pyfiglet
