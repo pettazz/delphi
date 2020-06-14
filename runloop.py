@@ -1,3 +1,19 @@
+import logging
+import sys
+import time
+import os
+import json
+
+import fontawesome as fa
+
+import requests
+
+import pygame
+from pygame import gfxdraw
+from pygame.locals import *
+
+from statictools import *
+
 def run(screen, background, last_weather_check, weather):
     for event in pygame.event.get():
         if event.type == KEYDOWN:
