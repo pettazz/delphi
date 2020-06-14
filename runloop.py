@@ -24,9 +24,9 @@ def weather_updater(last_weather_check):
             if res.status_code == 200:
                 weather = json.loads(res.text)
                 logger.info("successfully fetched new weather: %s" % weather[:100])
-        except:
+        except Exception as e:
             logger.warning("failed to fetch weather, guess we'll try next tick")
-            logger.warning(res)
+            logger.warning(e)
 
     return weather
 
