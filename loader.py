@@ -23,8 +23,9 @@ if __name__ == "__main__":
   weather = None
 
   while True:
-    weather = script.weather_updater(last_weather_check)
-    if weather:
+    new_weather = script.weather_updater(last_weather_check)
+    if new_weather:
       last_weather_check = time.time()
+      weather = new_weather
     script.run(screen, background, weather)
     time.sleep(1)

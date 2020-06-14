@@ -14,16 +14,15 @@ from pygame.locals import *
 from statictools import *
 
 def weather_updater(last_weather_check):
+    weather = None
     if time.time() - last_weather_check > WEATHER_INTERVAL:
         print('refreshing weather data...')
         try:
             res = requests.get(DARKSKY_FORECAST)
             if res.status_code == 200:
-                weather = None
                 weather = json.loads(res.text)
         except:
             print("failed to fetch weather, guess we'll try next tick")
-            weather = None
 
     return weather
 
