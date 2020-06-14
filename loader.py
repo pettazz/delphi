@@ -41,7 +41,7 @@ if __name__ == "__main__":
       logger.info("updating git repo...")
       git_repo.remotes.origin.pull()
       last_git_check = time.time()
-      logger.info("set last git pull to %s" %s)
+      logger.info("set last git pull to %s" %last_git_check)
 
     new_weather = script.weather_updater(last_weather_check)
     if new_weather is not None:
