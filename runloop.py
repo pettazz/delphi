@@ -13,7 +13,21 @@ from pygame.locals import *
 
 from statictools import *
 
-def run(screen, background, last_weather_check, weather):
+def weather_updater(last_weather_check):
+    if time.time() - last_weather_check > WEATHER_INTERVAL:
+        print('refreshing weather data...')
+        try:
+            res = requests.get(DARKSKY_FORECAST)
+            if res.status_code == 200:
+                weather = None
+                weather = json.loads(res.text)
+        except:
+            print("failed to fetch weather, guess we'll try next tick")
+            weather = None
+
+    return weather
+
+def run(screen, background, weather):
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
@@ -32,18 +46,6 @@ def run(screen, background, last_weather_check, weather):
 
     text(screen, now_date, (242, 302), 30, (0, 0, 0))
     text(screen, now_date, (240, 300), 30, (255, 255, 255))
-
-    if time.time() - last_weather_check > WEATHER_INTERVAL:
-        print('refreshing weather data...')
-        try:
-            res = requests.get(DARKSKY_FORECAST)
-            if res.status_code == 200:
-                weather = None
-                last_weather_check = time.time()
-                weather = json.loads(res.text)
-                print(weather['currently'])
-        except:
-            print("failed to fetch weather, guess we'll try next tick")
 
     if weather:
         icon = WEATHER_ICON_MAP[weather['currently']['icon']]
@@ -66,9 +68,5 @@ def run(screen, background, last_weather_check, weather):
 
     if os.path.isfile('/home/pi/src/clocko/hello'):
         fullscreen_message(screen, "Wow okay big man has an update for me", (138, 7, 7))
-
-#    pygame.draw.aaline(screen, (170, 9, 9), (0, 200), (480, 200))
-#    pygame.draw.aaline(screen, (170, 9, 9), (0, 400), (480, 400))
-#    pygame.draw.aaline(screen, (170, 9, 9), (0, 600), (480, 600))
 
     pygame.display.flip()
