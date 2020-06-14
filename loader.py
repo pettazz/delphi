@@ -26,5 +26,5 @@ if __name__ == "__main__":
     weather = script.weather_updater(last_weather_check)
     if weather:
       last_weather_check = time.time()
-    script.run(screen, background, last_weather_check, weather)
+    script.run(screen, background, weather)
     time.sleep(1)
