@@ -6,6 +6,11 @@ import pygame
 from hotreload import Loader
 
 if __name__ == "__main__":
+  logging.basicConfig(filename='clocko.log',
+                      filemode='a',
+                      level=logging.DEBUG)
+  logger = logging.getLogger('main')
+
   script = Loader("runloop.py")
 
   pygame.init()
@@ -27,5 +32,6 @@ if __name__ == "__main__":
     if new_weather:
       last_weather_check = time.time()
       weather = new_weather
+      logger.info("got new weather, set last check time to %s" % last_weather_check)
     script.run(screen, background, weather)
     time.sleep(1)

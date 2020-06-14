@@ -14,19 +14,24 @@ from pygame.locals import *
 from statictools import *
 
 def weather_updater(last_weather_check):
+    logger = logging.getLogger('weather_updater')
+
     weather = None
     if time.time() - last_weather_check > WEATHER_INTERVAL:
-        print('refreshing weather data...')
+        logger.info('refreshing weather data...')
         try:
             res = requests.get(DARKSKY_FORECAST)
             if res.status_code == 200:
                 weather = json.loads(res.text)
+                logger.info("successfully fetched new weather: %s" % weather)
         except:
-            print("failed to fetch weather, guess we'll try next tick")
+            logger.warning("failed to fetch weather, guess we'll try next tick")
 
     return weather
 
 def run(screen, background, weather):
+    logger = logging.getLogger('runloop')
+
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
