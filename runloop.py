@@ -112,7 +112,7 @@ def run(screen, weather, ambient, background):
     text_shadow(screen, now_date, (242, 252), 45, (255, 255, 255))
 
     fa_text_shadow(screen, 'tachometer-alt', (372, 572), 65, (255, 255, 255), "left")
-    text_shadow(screen, "Temp: %s°F, Humidity: %s%" % (ambient['temperature'], ambient['humidity']), (52, 572), 30, (255, 255, 255), "left")
+    text_shadow(screen, "Temp: %s°F, Humidity: %s" % (ambient['temperature'], ambient['humidity']), (52, 572), 30, (255, 255, 255), "left")
     text_shadow(screen, "Status: cooling", (52, 602), 30, (255, 255, 255), "left")
 
     if weather:
