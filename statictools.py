@@ -39,7 +39,7 @@ def screen_text(screen, text, position, size, color, align="center"):
 
 def text_shadow(screen, text, position, size, color, align="center", shadow_color=(0, 0, 0)):
     screen_text(screen, text, position, size, shadow_color, align)
-    screen_text(screen, text, (position[0] - 2, position[1] - 2), size, color, align)
+    screen_text(screen, text, (position[0] - 3, position[1] - 3), size, color, align)
 
 def fa_text(screen, name, position, size, color, align="center"):
     font = pygame.font.Font('assets/font/fa-solid-900.ttf', size)
@@ -47,7 +47,7 @@ def fa_text(screen, name, position, size, color, align="center"):
 
 def fa_text_shadow(screen, name, position, size, color, align="center", shadow_color=(0, 0, 0)):
     fa_text(screen, name, position, size, shadow_color, align)
-    fa_text(screen, name, (position[0] - 2, position[1] - 2), size, color, align)
+    fa_text(screen, name, (position[0] - 3, position[1] - 3), size, color, align)
 
 def fullscreen_message(screen, message, color):
     screen.fill((0, 0, 0))
