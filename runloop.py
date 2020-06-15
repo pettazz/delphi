@@ -113,9 +113,9 @@ def run(screen, weather, ambient, background):
     text_shadow(screen, now_time, (242, 152), 200, (255, 255, 255))
     text_shadow(screen, now_date, (242, 252), 45, (255, 255, 255))
 
-    fa_text_shadow(screen, 'envira', (372, 572), 65, (200, 200, 200), "left")
-    text_shadow(screen, "Temp: 78.2 F, Humidity: 54%", (52, 572), 30, (200, 200, 200), "left")
-    text_shadow(screen, "Status: cooling", (52, 602), 30, (200, 200, 200), "left")
+    fa_text_shadow(screen, 'house-user', (372, 572), 65, (255, 255, 255), "left")
+    text_shadow(screen, "Temp: %s°F, Humidity: %s%" % (ambient['temperature'], ambient['humidity']), (52, 572), 30, (255, 255, 255), "left")
+    text_shadow(screen, "Status: cooling", (52, 602), 30, (255, 255, 255), "left")
 
     if weather:
         icon = WEATHER_ICON_MAP[weather['currently']['icon']]
