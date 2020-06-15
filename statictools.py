@@ -33,13 +33,13 @@ def _textgen(screen, text, position, size, color, align, font):
         textpos.center = position
     screen.blit(text, textpos)
 
-def text(screen, text, position, size, color, align="center"):
+def screen_text(screen, text, position, size, color, align="center"):
     font = pygame.font.Font('assets/font/Staatliches-Regular.ttf', size)
     _textgen(screen, text, position, size, color, align, font)
 
 def text_shadow(screen, text, position, size, color, align="center", shadow_color=(0, 0, 0)):
-    text(screen, text, position, size, color, align)
-    text(screen, text, (position[0] - 2, position[1] - 2), size, shadow_color, align)
+    screen_text(screen, text, position, size, color, align)
+    screen_text(screen, text, (position[0] - 2, position[1] - 2), size, shadow_color, align)
 
 def fa_text(screen, name, position, size, color, align="center"):
     font = pygame.font.Font('assets/font/fa-solid-900.ttf', size)
@@ -51,4 +51,4 @@ def fa_text_shadow(screen, name, position, size, color, align="center", shadow_c
 
 def fullscreen_message(screen, message, color):
     screen.fill((0, 0, 0))
-    text(screen, message, (240, 400), 30, color)
+    screen_text(screen, message, (240, 400), 30, color)
