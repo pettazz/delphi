@@ -5,8 +5,6 @@ import os
 import json
 import random
 
-import fontawesome as fa
-
 import requests
 
 import board
@@ -113,7 +111,7 @@ def run(screen, weather, ambient, background):
     text_shadow(screen, now_time, (242, 152), 200, (255, 255, 255))
     text_shadow(screen, now_date, (242, 252), 45, (255, 255, 255))
 
-    fa_text_shadow(screen, 'house-user', (372, 572), 65, (255, 255, 255), "left")
+    fa_text_shadow(screen, 'tachometer-alt', (372, 572), 65, (255, 255, 255), "left")
     text_shadow(screen, "Temp: %s°F, Humidity: %s%" % (ambient['temperature'], ambient['humidity']), (52, 572), 30, (255, 255, 255), "left")
     text_shadow(screen, "Status: cooling", (52, 602), 30, (255, 255, 255), "left")
 
