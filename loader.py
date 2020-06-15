@@ -10,6 +10,8 @@ from pyfiglet import Figlet
 
 from hotreload import Loader
 
+import adafruit_dht
+
 GIT_REFRESH_INTERVAL = 300
 
 if __name__ == "__main__":
