@@ -108,12 +108,12 @@ def run(screen, weather, ambient, background):
     if now_time[0] == "0":
         now_time = now_time[1:]
 
-    text_shadow(screen, now_time, (242, 152), 200, (255, 255, 255))
-    text_shadow(screen, now_date, (242, 252), 45, (255, 255, 255))
+    text_shadow(screen, now_time, (242, 252), 200, (255, 255, 255))
+    text_shadow(screen, now_date, (242, 352), 45, (255, 255, 255))
 
     fa_text_shadow(screen, 'tachometer-alt', (372, 572), 65, (255, 255, 255), "left")
-    text_shadow(screen, "Temp: %s°F, Humidity: %s" % (ambient['temperature'], ambient['humidity']), (52, 572), 30, (255, 255, 255), "left")
-    text_shadow(screen, "Status: cooling", (52, 602), 30, (255, 255, 255), "left")
+    text_shadow(screen, "Temperature: %s°F," % ambient['temperature'], (52, 572), 30, (255, 255, 255), "left")
+    text_shadow(screen, "Humidity: %s%%" % ambient['humidity'], (52, 602), 30, (255, 255, 255), "left")
 
     if weather:
         icon = WEATHER_ICON_MAP[weather['currently']['icon']]
