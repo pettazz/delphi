@@ -11,6 +11,7 @@ from pyfiglet import Figlet
 from hotreload import Loader
 
 import adafruit_dht
+import board
 
 GIT_REFRESH_INTERVAL = 300
 
