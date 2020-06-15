@@ -39,13 +39,13 @@ def ambient_updater(last_ambient_check, dhtDevice):
 
     ambient = None
     if time.time() - last_ambient_check > AMBIENT_INTERVAL:
-        logger.info('refreshing weather data...')
+        logger.info('refreshing ambient data...')
         try:
             tempf = dhtDevice.temperature * (9 / 5) + 32
             humidity = dhtDevice.humidity
 
             ambient = {
-                "temperature": format("{:.1f}", tempf),
+                "temperature": "{:.1f}".format(tempf),
                 "humidity": humidity
             }
             logger.info("successfully fetched new ambient readings: %s" % ambient)
@@ -110,8 +110,8 @@ def run(screen, weather, ambient, background):
     if now_time[0] == "0":
         now_time = now_time[1:]
 
-    text_shadow(screen, now_time, (242, 152), 200, (0, 0, 0))
-    text_shadow(screen, now_date, (242, 252), 45, (0, 0, 0))
+    text_shadow(screen, now_time, (242, 152), 200, (255, 255, 255))
+    text_shadow(screen, now_date, (242, 252), 45, (255, 255, 255))
 
     fa_text_shadow(screen, 'envira', (372, 572), 65, (200, 200, 200), "left")
     text_shadow(screen, "Temp: 78.2 F, Humidity: 54%", (52, 572), 30, (200, 200, 200), "left")
@@ -127,8 +127,8 @@ def run(screen, weather, ambient, background):
         text1 = "%s°, feels like %s°, %s%% precip" % (temp, feels, precipProb)
         text2 = hour_summary
 
-        fa_text_shadow(screen, icon, (32, 672), 65, (0, 0, 0), "left")
-        text_shadow(screen, text1, (122, 672), 30, (0, 0, 0), "left")
-        text_shadow(screen, text2, (122, 702), 30, (0, 0, 0), "left")
+        fa_text_shadow(screen, icon, (32, 672), 65, (255, 255, 255), "left")
+        text_shadow(screen, text1, (122, 672), 30, (255, 255, 255), "left")
+        text_shadow(screen, text2, (122, 702), 30, (255, 255, 255), "left")
 
     pygame.display.flip()
