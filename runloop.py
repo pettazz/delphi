@@ -108,12 +108,12 @@ def run(screen, weather, ambient, background):
     if now_time[0] == "0":
         now_time = now_time[1:]
 
-    text_shadow(screen, now_time, (242, 252), 200, (255, 255, 255))
-    text_shadow(screen, now_date, (242, 352), 45, (255, 255, 255))
+    text_shadow(screen, now_time, (242, 202), 200, (255, 255, 255))
+    text_shadow(screen, now_date, (242, 302), 45, (255, 255, 255))
 
-    fa_text_shadow(screen, 'tachometer-alt', (372, 572), 65, (255, 255, 255), "left")
-    text_shadow(screen, "Temperature: %s°F," % ambient['temperature'], (52, 572), 30, (255, 255, 255), "left")
-    text_shadow(screen, "Humidity: %s%%" % ambient['humidity'], (52, 602), 30, (255, 255, 255), "left")
+    fa_text_shadow(screen, 'tachometer-alt', (372, 472), 65, (255, 255, 255), "left")
+    text_shadow(screen, "Temperature: %s°F" % ambient['temperature'], (52, 472), 30, (255, 255, 255), "left")
+    text_shadow(screen, "Humidity: %s%%" % ambient['humidity'], (52, 502), 30, (255, 255, 255), "left")
 
     if weather:
         icon = WEATHER_ICON_MAP[weather['currently']['icon']]
@@ -125,8 +125,8 @@ def run(screen, weather, ambient, background):
         text1 = "%s°, feels like %s°, %s%% precip" % (temp, feels, precipProb)
         text2 = hour_summary
 
-        fa_text_shadow(screen, icon, (32, 672), 65, (255, 255, 255), "left")
-        text_shadow(screen, text1, (122, 672), 30, (255, 255, 255), "left")
-        text_shadow(screen, text2, (122, 702), 30, (255, 255, 255), "left")
+        fa_text_shadow(screen, icon, (32, 572), 65, (255, 255, 255), "left")
+        text_shadow(screen, text1, (122, 572), 30, (255, 255, 255), "left")
+        text_shadow(screen, text2, (122, 602), 30, (255, 255, 255), "left")
 
     pygame.display.flip()
