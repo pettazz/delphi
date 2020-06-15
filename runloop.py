@@ -41,7 +41,7 @@ def ambient_updater(last_ambient_check, dhtDevice):
     if time.time() - last_ambient_check > AMBIENT_INTERVAL:
         logger.info('refreshing weather data...')
         try:
-            tempf = temperature_c * (9 / 5) + 32
+            tempf = dhtDevice.temperature * (9 / 5) + 32
             humidity = dhtDevice.humidity
 
             ambient = {
