@@ -9,6 +9,9 @@ import fontawesome as fa
 
 import requests
 
+import board
+import adafruit_dht
+
 import pygame
 from pygame.locals import *
 
@@ -30,6 +33,27 @@ def weather_updater(last_weather_check):
             logger.warning(e)
 
     return weather
+
+def ambient_updater(last_ambient_check, dhtDevice):
+    logger = logging.getLogger('ambient_updater')
+
+    ambient = None
+    if time.time() - last_ambient_check > AMBIENT_INTERVAL:
+        logger.info('refreshing weather data...')
+        try:
+            tempf = temperature_c * (9 / 5) + 32
+            humidity = dhtDevice.humidity
+
+            ambient = {
+                "temperature": format("{:.1f}", tempf),
+                "humidity": humidity
+            }
+            logger.info("successfully fetched new ambient readings: %s" % ambient)
+        except Exception as e:
+            logger.warning("failed to fetch ambient, guess we'll try next tick")
+            logger.warning(e)
+
+    return ambient
 
 def background_updater(last_background_update):
     logger = logging.getLogger('background_updater')
@@ -68,7 +92,7 @@ def background_updater(last_background_update):
 
     return background_details
 
-def run(screen, weather, background):
+def run(screen, weather, ambient, background):
     logger = logging.getLogger('runloop')
 
     for event in pygame.event.get():
@@ -86,11 +110,12 @@ def run(screen, weather, background):
     if now_time[0] == "0":
         now_time = now_time[1:]
 
-    text(screen, now_time, (242, 202), 200, (0, 0, 0))
-    text(screen, now_time, (240, 200), 200, (255, 255, 255))
+    text_shadow(screen, now_time, (242, 152), 200, (0, 0, 0))
+    text_shadow(screen, now_date, (242, 252), 45, (0, 0, 0))
 
-    text(screen, now_date, (242, 302), 30, (0, 0, 0))
-    text(screen, now_date, (240, 300), 30, (255, 255, 255))
+    fa_text_shadow(screen, 'envira', (372, 572), 65, (200, 200, 200), "left")
+    text_shadow(screen, "Temp: 78.2 F, Humidity: 54%", (52, 572), 30, (200, 200, 200), "left")
+    text_shadow(screen, "Status: cooling", (52, 602), 30, (200, 200, 200), "left")
 
     if weather:
         icon = WEATHER_ICON_MAP[weather['currently']['icon']]
@@ -102,16 +127,8 @@ def run(screen, weather, background):
         text1 = "%s°, feels like %s°, %s%% precip" % (temp, feels, precipProb)
         text2 = hour_summary
 
-        fa_text(screen, icon, (242, 602), 150, (0, 0, 0))
-        fa_text(screen, icon, (240, 600), 150, (255, 255, 255))
-
-        text(screen, text1, (242, 702), 30, (0, 0, 0))
-        text(screen, text1, (240, 700), 30, (255, 255, 255))
-
-        text(screen, text2, (242, 732), 30, (0, 0, 0))
-        text(screen, text2, (240, 730), 30, (255, 255, 255))
-
-    if os.path.isfile('/home/pi/src/clocko/hello'):
-        fullscreen_message(screen, "Wow okay big man has an update for me", (138, 7, 7))
+        fa_text_shadow(screen, icon, (32, 672), 65, (0, 0, 0), "left")
+        text_shadow(screen, text1, (122, 672), 30, (0, 0, 0), "left")
+        text_shadow(screen, text2, (122, 702), 30, (0, 0, 0), "left")
 
     pygame.display.flip()

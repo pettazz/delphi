@@ -41,6 +41,10 @@ if __name__ == "__main__":
   last_background_update = 0
   background_details = None
 
+  dhtDevice = adafruit_dht.DHT11(board.D27)
+  last_ambient_check = 0
+  ambient = None
+
   while True:
     if time.time() - last_git_check > GIT_REFRESH_INTERVAL:
       logger.info("updating git repo...")
@@ -54,12 +58,18 @@ if __name__ == "__main__":
       weather = new_weather
       logger.info("got new weather, set last check time to %s" % last_weather_check)
 
+    new_ambient = script.ambient_updater(last_ambient_check, dhtDevice)
+    if new_ambient is not None:
+      last_ambient_check = time.time()
+      ambient = new_ambient
+      logger.info("got new ambient, set last check time to %s" % last_ambient_check)
+
     new_bg = script.background_updater(last_background_update)
     if new_bg is not None:
       last_background_update = time.time()
       background_details = new_bg
       logger.info("updating background at %s" % last_background_update)
 
-    script.run(screen, weather, background_details)
+    script.run(screen, weather, ambient, background_details)
 
     time.sleep(1)
