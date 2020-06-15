@@ -7,6 +7,7 @@ from pygame.locals import *
 BACKGROUND_INTERVAL = 300
 BACKGROUND_PATH = "assets/img/backgrounds/"
 WEATHER_INTERVAL = 300
+AMBIENT_INTERVAL = 120
 DARKSKY_FORECAST = 'https://api.darksky.net/forecast/fd361ec0a4d4d24011a96cb6b47cd272/42.378920,-71.091040'
 WEATHER_ICON_MAP = {
   'clear-day': 'sun',
