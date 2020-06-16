@@ -2,4 +2,13 @@
 
 export DISPLAY=:0.0
 
-python3 loader.py > clocko.stdout 2>&1
+_term() { 
+  kill -TERM "$child" 2>/dev/null
+}
+
+trap _term SIGTERM
+
+python3 loader.py > clocko.stdout 2>&1 &
+
+child=$! 
+wait "$child"
