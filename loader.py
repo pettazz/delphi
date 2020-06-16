@@ -29,6 +29,7 @@ if __name__ == "__main__":
 
   pygame.init()
 
+  logger.debug(pygame.display.Info())
   size = width, height = 480, 800
   pygame.display.init()
   screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
