@@ -110,7 +110,7 @@ def main():
   reloader.watch_files([
     'runloop.py',
     'statictools.py',
-    'assets/**'
+    'assets/*'
   ])
 
   d = Delphi()
