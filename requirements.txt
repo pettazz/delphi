@@ -4,4 +4,4 @@ hotreload
 fontawesome
 requests
 pyfiglet
-adafruit_dht
+adafruit-circuitpython-dht
