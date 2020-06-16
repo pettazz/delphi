@@ -65,6 +65,11 @@ class Delphi:
 
   def runner(self):
     logger = logging.getLogger('runner')
+
+    weather = None
+    ambient = None
+    background_details = None
+
     while self.alive:
       if time.time() - self.last_git_check > GIT_REFRESH_INTERVAL:
         logger.info("updating git repo...")
@@ -84,8 +89,6 @@ class Delphi:
           self.last_ambient_check = time.time()
           ambient = new_ambient
           logger.info("got new ambient, set last check time to %s" % self.last_ambient_check)
-      else:
-        ambient = None
 
       new_bg = self.script.background_updater(self.last_background_update)
       if new_bg is not None:
@@ -99,7 +102,7 @@ class Delphi:
 
   def quitter(self, signum, frame):
     logger = logging.getLogger('quitter')
-    logger('caught signal %s, ending runloop' % signum)
+    logger.info('caught signal %s, ending runloop' % signum)
     self.alive = False
 
 if __name__ == "__main__":
