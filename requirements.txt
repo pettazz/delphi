@@ -1,6 +1,7 @@
 pygame
 GitPython
 hupper
+watchdog
 fontawesome
 requests
 pyfiglet
