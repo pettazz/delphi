@@ -100,7 +100,7 @@ def run(screen, weather, ambient, background):
                 sys.exit()
 
     if background is not None:
-        screen.blit(background['image'], (background['offset'][0], background['offset'][1]))
+        screen.blit(background['image'], 0, 0)
 
     now_time = time.strftime("%I:%M")
     now_date = time.strftime("%A, %B %-d")
