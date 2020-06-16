@@ -91,43 +91,51 @@ def background_updater(last_background_update):
 
     return background_details
 
+def quit(reason="unknown"):
+    logger.info("killed by %s, goodbye!" % reason)
+    sys.exit()
+
 def run(screen, weather, ambient, background):
-    logger = logging.getLogger('runloop')
+    try:
+        logger = logging.getLogger('runloop')
 
-    for event in pygame.event.get():
-        if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                logger.info("killed by ESC key, goodbye!")
-                sys.exit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit('pygame QUIT event')
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    quit('ESC key')
 
-    if background is not None:
-        screen.blit(background['image'], (background['offset'][0], background['offset'][1]))
+        if background is not None:
+            screen.blit(background['image'], (background['offset'][0], background['offset'][1]))
 
-    now_time = time.strftime("%I:%M")
-    now_date = time.strftime("%A, %B %-d")
+        now_time = time.strftime("%I:%M")
+        now_date = time.strftime("%A, %B %-d")
 
-    if now_time[0] == "0":
-        now_time = now_time[1:]
+        if now_time[0] == "0":
+            now_time = now_time[1:]
 
-    text_shadow(screen, now_time, (242, 202), 200, (255, 255, 255))
-    text_shadow(screen, now_date, (242, 302), 45, (255, 255, 255))
+        text_shadow(screen, now_time, (242, 202), 200, (255, 255, 255))
+        text_shadow(screen, now_date, (242, 302), 45, (255, 255, 255))
 
-    fa_text_shadow(screen, 'tachometer-alt', (372, 472), 65, (255, 255, 255), "left")
-    text_shadow(screen, "Temperature: %s°F" % ambient['temperature'], (52, 472), 30, (255, 255, 255), "left")
-    text_shadow(screen, "Humidity: %s%%" % ambient['humidity'], (52, 502), 30, (255, 255, 255), "left")
+        fa_text_shadow(screen, 'tachometer-alt', (372, 472), 65, (255, 255, 255), "left")
+        text_shadow(screen, "Temperature: %s°F" % ambient['temperature'], (52, 472), 30, (255, 255, 255), "left")
+        text_shadow(screen, "Humidity: %s%%" % ambient['humidity'], (52, 502), 30, (255, 255, 255), "left")
 
-    if weather:
-        icon = WEATHER_ICON_MAP[weather['currently']['icon']]
-        temp = int(weather['currently']['temperature'])
-        feels = int(weather['currently']['apparentTemperature'])
-        precipProb = int(weather['currently']['precipProbability'] * 100)
-        hour_summary = weather['minutely']['summary']
+        if weather:
+            icon = WEATHER_ICON_MAP[weather['currently']['icon']]
+            temp = int(weather['currently']['temperature'])
+            feels = int(weather['currently']['apparentTemperature'])
+            precipProb = int(weather['currently']['precipProbability'] * 100)
+            hour_summary = weather['minutely']['summary']
 
-        text1 = "%s°, feels like %s°, %s%% precip" % (temp, feels, precipProb)
-        text2 = hour_summary
+            text1 = "%s°, feels like %s°, %s%% precip" % (temp, feels, precipProb)
+            text2 = hour_summary
 
-        fa_text_shadow(screen, icon, (32, 572), 65, (255, 255, 255), "left")
-        text_shadow(screen, text1, (122, 572), 30, (255, 255, 255), "left")
-        text_shadow(screen, text2, (122, 602), 30, (255, 255, 255), "left")
+            fa_text_shadow(screen, icon, (32, 572), 65, (255, 255, 255), "left")
+            text_shadow(screen, text1, (122, 572), 30, (255, 255, 255), "left")
+            text_shadow(screen, text2, (122, 602), 30, (255, 255, 255), "left")
 
-    pygame.display.flip()
+        pygame.display.flip()
+    except KeyboardInterrupt:
+        quit('keyboard interrupt')

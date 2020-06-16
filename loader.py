@@ -1,6 +1,7 @@
 import logging
 import time
 import pathlib
+import signal
 
 import git 
 
@@ -28,6 +29,9 @@ if __name__ == "__main__":
   script = Loader("runloop.py")
 
   pygame.init()
+
+  signal.signal(signal.SIGINT, pygame.quit)
+  signal.signal(signal.SIGTERM, pygame.quit)
 
   size = width, height = 480, 800
   pygame.display.init()
