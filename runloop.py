@@ -58,6 +58,7 @@ def background_updater(last_background_update):
 
     SCREEN_WIDTH = 480
     SCREEN_HEIGHT = 800
+    SCREEN_WIDTH_CORRECTION = 80 # the pixels are wrong? wat da fuk
 
     background_details = None
 
@@ -70,11 +71,11 @@ def background_updater(last_background_update):
 
         img_width, img_height = img.get_size()
         if img_width < img_height:
-            new_width = SCREEN_WIDTH
+            new_width = SCREEN_WIDTH + SCREEN_WIDTH_CORRECTION
             new_height = (new_width * img_height) // img_width
         else:
             new_height = SCREEN_HEIGHT
-            new_width = (new_height * img_width) // img_height
+            new_width = ((new_height * img_width) // img_height) + SCREEN_WIDTH_CORRECTION
 
         background = pygame.transform.scale(img, (new_width, new_height))
       
