@@ -1,6 +1,6 @@
 pygame
 GitPython
-hotreload
+hupper
 fontawesome
 requests
 pyfiglet
