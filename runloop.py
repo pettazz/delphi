@@ -92,6 +92,7 @@ def background_updater(last_background_update):
     return background_details
 
 def quit(reason="unknown"):
+    logger = logging.getLogger('quitter')
     logger.info("killed by %s, goodbye!" % reason)
     sys.exit()
 
