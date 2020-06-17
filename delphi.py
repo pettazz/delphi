@@ -49,8 +49,15 @@ class Delphi:
 
     size = width, height = 480, 800
     pygame.display.init()
+    os.environ['SDL_VIDEODRIVER'] = 'fbcon'
+    os.environ['SDL_FBDEV'] = '/dev/fb0'
     self.logger.debug(pygame.display.Info())
-    self.screen = pygame.display.set_mode(size, FULLSCREEN_MODE)
+    self.logger.debug("SDL_VIDEODRIVER: %s" % os.getenv("SDL_VIDEODRIVER"))
+    self.logger.debug("SDL_FBDEV: %s" % os.getenv("SDL_FBDEV"))
+    try:
+        self.screen = pygame.display.set_mode(size, FULLSCREEN_MODE)
+    except:
+        self.logger.critical('could not set mode on display', exc_info=True)
     pygame.mouse.set_visible(False)
 
     self.last_weather_check = 0
@@ -220,22 +227,21 @@ class Delphi:
 
       time.sleep(1)
 
-    self.logger.info('goodbye!')
-    pygame.QUIT()
-    sys.exit()
-
   def quitter(self, signum=None, frame=None, msg=None):
     if signum:
       self.logger.info('caught signal %s, ending runloop' % signum)
     if msg:
       self.logger.info('killed by %s, ending runloop' % msg)
-    self.logger.info('quitting...')
     self.alive = False
+    
+    self.logger.info('goodbye!')
+    pygame.display.quit()
+    pygame.quit()
+    sys.exit()
 
 def main():
   reloader = hupper.start_reloader('delphi.main')
   reloader.watch_files([
-    'runloop.py',
     'statictools.py',
     'assets/*'
   ])
