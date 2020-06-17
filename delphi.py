@@ -36,7 +36,7 @@ class Delphi:
     handler = logging.FileHandler('clocko.log')
     handler.setFormatter(log_formatter)
     self.logger.addHandler(handler)
-    self.logger.setLevel(level=logging.DEBUG)
+    self.logger.setLevel(level=LOGLEVEL)
 
     figl = Figlet(font='larry3d')
     banner = figl.renderText("hello delphi")
@@ -221,6 +221,7 @@ class Delphi:
       time.sleep(1)
 
     self.logger.info('goodbye!')
+    pygame.QUIT()
     sys.exit()
 
   def quitter(self, signum=None, frame=None, msg=None):
