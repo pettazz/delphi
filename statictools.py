@@ -1,8 +1,11 @@
+import logging
+
 import fontawesome as fa
 
 import pygame
 from pygame.locals import *
 
+LOGLEVEL = logging.DEBUG
 
 BACKGROUND_INTERVAL = 300
 BACKGROUND_PATH = "assets/img/backgrounds/"

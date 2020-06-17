@@ -8,7 +8,7 @@ _term() {
 
 trap _term SIGTERM
 
-python3 loader.py > clocko.stdout 2>&1 &
+python3 delphi.py > clocko.stdout 2>&1 &
 
 child=$! 
 wait "$child"
