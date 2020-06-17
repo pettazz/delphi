@@ -20,6 +20,7 @@ from statictools import *
 
 def weather_updater(last_weather_check):
     logger = logging.getLogger('weather_updater')
+    logger.setLevel(logging.DEBUG)
 
     weather = None
     if time.time() - last_weather_check > WEATHER_INTERVAL:
@@ -37,6 +38,7 @@ def weather_updater(last_weather_check):
 
 def ambient_updater(last_ambient_check, dhtDevice):
     logger = logging.getLogger('ambient_updater')
+    logger.setLevel(logging.DEBUG)
 
     ambient = None
     if time.time() - last_ambient_check > AMBIENT_INTERVAL:
@@ -58,6 +60,7 @@ def ambient_updater(last_ambient_check, dhtDevice):
 
 def background_updater(last_background_update):
     logger = logging.getLogger('background_updater')
+    logger.setLevel(logging.DEBUG)
 
     SCREEN_WIDTH = 480
     SCREEN_HEIGHT = 800
@@ -96,11 +99,13 @@ def background_updater(last_background_update):
 
 def quit(reason="unknown"):
     logger = logging.getLogger('quit')
+    logger.setLevel(logging.DEBUG)
     logger.info("killed by %s, goodbye!" % reason)
     sys.exit()
 
 def run(screen, weather, ambient, background):
     logger = logging.getLogger('runloop')
+    logger.setLevel(logging.DEBUG)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

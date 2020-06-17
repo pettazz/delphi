@@ -22,15 +22,16 @@ import runloop
 
 logging.basicConfig(filename='clocko.log',
                     format='%(asctime)s %(name)s [%(levelname)s] %(message)s',
-                    filemode='a',
-                    level=logging.DEBUG)
+                    filemode='a')
 
+LOGLEVEL = logging.DEBUG
 FULLSCREEN_MODE = 0
 GIT_REFRESH_INTERVAL = 300
 
 class Delphi:
   def __init__(self):
     logger = logging.getLogger('init')
+    logger.setLevel(LOGLEVEL)
 
     figl = Figlet(font='larry3d')
     banner = figl.renderText("hello delphi")
@@ -65,6 +66,7 @@ class Delphi:
 
   def runner(self):
     logger = logging.getLogger('runner')
+    logger.setLevel(LOGLEVEL)
 
     weather = None
     ambient = None
@@ -102,6 +104,7 @@ class Delphi:
 
   def quitter(self, signum, frame):
     logger = logging.getLogger('quitter')
+    logger.setLevel(LOGLEVEL)
     logger.info('caught signal %s, ending runloop' % signum)
     self.alive = False
 
