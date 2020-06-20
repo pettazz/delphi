@@ -58,6 +58,7 @@ class Delphi:
         self.screen = pygame.display.set_mode(size, FULLSCREEN_MODE)
     except:
         self.logger.critical('could not set mode on display', exc_info=True)
+        self.quitter()
     pygame.mouse.set_visible(False)
 
     self.last_weather_check = 0
@@ -235,6 +236,7 @@ class Delphi:
     self.alive = False
     
     self.logger.info('goodbye!')
+    self.dhtDevice = None
     pygame.display.quit()
     pygame.quit()
     sys.exit()
