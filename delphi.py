@@ -16,9 +16,10 @@ from pygame.locals import *
 
 from pyfiglet import Figlet
 
-import adafruit_dht
 try:
     import board
+    import RPi.GPIO as GPIO
+    import adafruit_dht
     DHT_SUPPORT = True
 except NotImplementedError:
     DHT_SUPPORT = False
@@ -237,6 +238,7 @@ class Delphi:
     
     self.logger.info('goodbye!')
     self.dhtDevice = None
+    GPIO.cleanup()
     pygame.display.quit()
     pygame.quit()
     sys.exit()

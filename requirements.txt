@@ -6,3 +6,4 @@ fontawesome
 requests
 pyfiglet
 adafruit-circuitpython-dht
+RPi.GPIOs
