@@ -136,14 +136,14 @@ class Delphi:
         img = pygame.image.load(BACKGROUND_PATH + image_name)
 
         img_width, img_height = img.get_size()
-        if img_width < img_height:
-            new_width = SCREEN_WIDTH + SCREEN_WIDTH_CORRECTION
-            new_height = (new_width * img_height) // img_width
+        if round(img_width / img_height, 3) > 0.6:
+          new_height = SCREEN_HEIGHT
+          new_width = ((new_height * img_width) // img_height) + SCREEN_WIDTH_CORRECTION
         else:
-            new_height = SCREEN_HEIGHT
-            new_width = ((new_height * img_width) // img_height) + SCREEN_WIDTH_CORRECTION
+          new_width = SCREEN_WIDTH + SCREEN_WIDTH_CORRECTION
+          new_height = (new_width * img_height) // img_width
 
-        background = pygame.transform.scale(img, (new_width, new_height))
+        background = pygame.transform.smoothscale(img, (new_width, new_height))
       
         width_offset = (SCREEN_WIDTH // 2) - (new_width // 2)
         height_offset = (SCREEN_HEIGHT // 2) - (new_height // 2)
