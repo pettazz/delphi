@@ -1,0 +1,2 @@
+LATLONG = (1.2345,-6.7890)
+CLIMACELL_API_KEY = "butts"
