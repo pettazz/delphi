@@ -7,8 +7,6 @@ import fontawesome as fa
 import pygame
 from pygame.locals import *
 
-from PIL import Image
-
 LOGLEVEL = logging.DEBUG
 
 COLOR_RGB = {
