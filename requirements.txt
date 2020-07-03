@@ -5,5 +5,8 @@ watchdog
 fontawesome
 requests
 pyfiglet
+pillow
+pytz
+tzlocal
 adafruit-circuitpython-dht
-RPi.GPIOs
+RPi.GPIO
