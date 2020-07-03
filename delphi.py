@@ -15,8 +15,6 @@ from tzlocal import get_localzone
 import pygame
 from pygame.locals import *
 
-from PIL import Image
-
 from pyfiglet import Figlet
 
 try:
@@ -91,9 +89,6 @@ class Delphi:
             res = requests.get(CLIMACELL_NOWCAST, timeout=1, params=CLIMACELL_PARAMS)
             if res.status_code == 200:
                 weather_raw = json.loads(res.text)
-
-                with open('lol.json', 'w') as dumperoo:
-                    dumperoo.write(str(weather_raw))
 
                 # basics
                 is_night = datetime.datetime.now(tz=datetime.timezone.utc) > datetime.datetime.fromisoformat(weather_raw[0]['sunset']['value'].replace('Z', '+00:00'))
