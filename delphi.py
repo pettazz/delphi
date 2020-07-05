@@ -111,13 +111,23 @@ class Delphi:
                 current = weather_raw[0]['weather_code']['value']
                 inflections = []
                 prev = current
+                base_time = datetime.datetime.now(tz=datetime.timezone.utc)
                 for idx, interval in enumerate(weather_raw):
                     if not interval['weather_code']['value'] == prev:
-                        inflections.append(interval)
+                        compare_time = datetime.datetime.fromisoformat(interval['observation_time']['value'].replace('Z', '+00:00'))
+                        diff_time = compare_time - base_time
+                        inflections.append({
+                            'code': interval['weather_code']['value'],
+                            'mins_from_prev': diff_time.seconds // 60
+                        })
                         prev = interval['weather_code']['value']
+                        base_time = compare_time
 
                 if inflections:
-                    state = "something's gonna happen"
+                    state = "%s now, " % WEATHER_CODES_TEXT[current]
+                    for inflection in inflections:
+                        state = state + "%s %s mins later, " % (WEATHER_CODES_TEXT[inflection['code']], inflection['mins_from_prev'])
+                    state = state[:-2]
                 else:
                     state = "%s for the hour" % WEATHER_CODES_TEXT[current]
 
@@ -262,6 +272,9 @@ class Delphi:
 
     return ambient
 
+  def calendar_updater(self):
+    pass
+
   def background_updater(self):
     SCREEN_WIDTH = 480
     SCREEN_HEIGHT = 800
@@ -319,7 +332,18 @@ class Delphi:
         fa_text_shadowed(self.screen, weather['icon'], (175, 507), 90, text_color)
         header_shadowed(self.screen, str(weather['temp']) + "°", (305, 510), 100, text_color)
         body_text_shadowed(self.screen, weather['feels_like_indicator'], (340, 500), 35, text_color)
-        header_shadowed(self.screen, weather['state'], (242, 575), 35, text_color)
+        state = weather['state']
+        if len(state) > 30:
+            split_pos = state.find(' ', 50) + 1
+            if split_pos > 1:
+                line1 = state[:split_pos]
+                line2 = state[split_pos:]
+                header_shadowed(self.screen, line1, (242, 570), 20, text_color)
+                header_shadowed(self.screen, line2, (242, 590), 20, text_color)
+            else:
+                header_shadowed(self.screen, state, (242, 575), 23, text_color)
+        else:
+            header_shadowed(self.screen, state, (242, 575), 35, text_color)
 
         # hi/low
         fa_text_shadowed(self.screen, 'angle-up', (120, 603), 23, text_color, "left")
@@ -361,8 +385,8 @@ class Delphi:
         fa_text_shadowed(self.screen, 'dot-circle', (253, 680), 20, COLOR_RGB[weather['grass_pollen_color']], "left")
 
         # aqi
-        fa_text_shadowed(self.screen, 'industry', (325, 680), 20, text_color, "left")
-        fa_text_shadowed(self.screen, 'dot-circle', (348, 680), 20, COLOR_RGB[weather['air_quality_color']], "left")
+        fa_text_shadowed(self.screen, 'industry', (324, 680), 20, text_color, "left")
+        fa_text_shadowed(self.screen, 'dot-circle', (347, 680), 20, COLOR_RGB[weather['air_quality_color']], "left")
 
     if ambient is not None:
         fa_text_shadowed(self.screen, 'microchip', (170, 733), 20, text_color, "left")
