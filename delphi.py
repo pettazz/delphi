@@ -111,7 +111,7 @@ class Delphi:
                 current = weather_raw[0]['weather_code']['value']
                 inflections = []
                 prev = current
-                base_time = datetime.datetime.now(tz=datetime.timezone.utc)
+                base_time = datetime.datetime.fromisoformat(weather_raw[0]['observation_time']['value'].replace('Z', '+00:00'))
                 for idx, interval in enumerate(weather_raw):
                     if not interval['weather_code']['value'] == prev:
                         compare_time = datetime.datetime.fromisoformat(interval['observation_time']['value'].replace('Z', '+00:00'))
