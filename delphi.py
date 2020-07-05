@@ -124,10 +124,10 @@ class Delphi:
                         base_time = compare_time
 
                 if inflections:
-                    state = "%s now, " % WEATHER_CODES_TEXT[current]
+                    # clear for 20 mins, then mostly clear for 20 mins, then mostly clear for 20 mins, then mostly clear
+                    state = "%s" % WEATHER_CODES_TEXT[current]
                     for inflection in inflections:
-                        state = state + "%s %s mins later, " % (WEATHER_CODES_TEXT[inflection['code']], inflection['mins_from_prev'])
-                    state = state[:-2]
+                        state = state + " for %s mins, then %s" % (inflection['mins_from_prev'], WEATHER_CODES_TEXT[inflection['code']])
                 else:
                     state = "%s for the hour" % WEATHER_CODES_TEXT[current]
 
