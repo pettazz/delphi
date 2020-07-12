@@ -199,15 +199,15 @@ class Delphi:
                 
                 # pollen
                 tree_pollen = weather_raw[0]['pollen_tree']['value']
-                tree_pollen = tree_pollen if tree_pollen is not None else 0
+                tree_pollen = round(tree_pollen) if tree_pollen is not None else 0
                 tree_pollen_color = POLLEN_COLOR_SCALE[tree_pollen]
 
                 weed_pollen = weather_raw[0]['pollen_weed']['value']
-                weed_pollen = weed_pollen if weed_pollen is not None else 0
+                weed_pollen = round(weed_pollen) if weed_pollen is not None else 0
                 weed_pollen_color = POLLEN_COLOR_SCALE[weed_pollen]
 
                 grass_pollen = weather_raw[0]['pollen_grass']['value']
-                grass_pollen = grass_pollen if grass_pollen is not None else 0
+                grass_pollen = round(grass_pollen) if grass_pollen is not None else 0
                 grass_pollen_color = POLLEN_COLOR_SCALE[grass_pollen]
 
                 weather = {
@@ -232,12 +232,13 @@ class Delphi:
                     'grass_pollen_color': grass_pollen_color
                 }
 
-                self.last_weather_check = time.time()
-
                 self.logger.info("successfully fetched new weather, current time: %s" % weather_raw[0]['observation_time']['value'])
-                self.logger.info("got new weather, set last check time to %s" % self.last_weather_check)
         except Exception as e:
-            self.logger.warning("failed to fetch weather, guess we'll try next tick", exc_info=True)
+            self.logger.warning("failed to fetch weather, guess we'll try next time", exc_info=True)
+
+    # even if it fails, we cant retry every tick or climacell will be mad 
+    # at us for going over the rate limit by 900% again
+    self.last_weather_check = time.time()
 
     return weather
 
