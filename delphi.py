@@ -236,9 +236,9 @@ class Delphi:
         except Exception as e:
             self.logger.warning("failed to fetch weather, guess we'll try next time", exc_info=True)
 
-    # even if it fails, we cant retry every tick or climacell will be mad 
-    # at us for going over the rate limit by 900% again
-    self.last_weather_check = time.time()
+        # even if it fails, we cant retry every tick or climacell will be mad 
+        # at us for going over the rate limit by 900% again
+        self.last_weather_check = time.time()
 
     return weather
 
