@@ -91,7 +91,11 @@ class Delphi:
                 weather_raw = json.loads(res.text)
 
                 # basics
-                is_night = datetime.datetime.now(tz=datetime.timezone.utc) > datetime.datetime.fromisoformat(weather_raw[0]['sunset']['value'].replace('Z', '+00:00'))
+                now_dt = datetime.datetime.now(tz=get_localzone())
+                sunrise_dt = datetime.datetime.fromisoformat(weather_raw[0]['sunrise']['value'].replace('Z', '+00:00')).astimezone(get_localzone())
+                sunset_dt = datetime.datetime.fromisoformat(weather_raw[0]['sunset']['value'].replace('Z', '+00:00')).astimezone(get_localzone())
+                is_night = now_dt < sunrise_dt or now_dt > sunset
+
                 icon = WEATHER_ICONS_MAP['day' if not is_night else 'night'][weather_raw[0]['weather_code']['value']]
 
                 # temp/feels like
