@@ -6,11 +6,14 @@ import sys
 import os
 import json
 import random
+import copy
 
-import requests
 import git 
 import hupper
+import requests
+from requests.exceptions import RequestException
 from tzlocal import get_localzone
+from ics import Calendar, Event
 
 import pygame
 from pygame.locals import *
@@ -63,44 +66,42 @@ class Delphi:
         self.quitter()
     pygame.mouse.set_visible(False)
 
-    self.last_weather_check = 0
-    self.weather = None
-
-    self.last_git_check = 0
     self.git_repo = git.Repo(pathlib.Path(__file__).parent.absolute())
 
+    self.last_weather_forecast_check = 0
+    self.last_weather_realtime_check = 0
+    self.last_git_check = 0
     self.last_background_update = 0
-    self.background_details = None
-
+    self.last_calendar_update = 0
     if DHT_SUPPORT:
       self.dhtDevice = adafruit_dht.DHT11(board.D27)
       self.last_ambient_check = 0
-    self.ambient = None
 
     self.alive = True
 
   def weather_updater(self):
     weather = None
-    if time.time() - self.last_weather_check > WEATHER_INTERVAL:
-        self.logger.info('refreshing weather data...')
+    forecast_state = None
+    realtime_check = False
+
+    if time.time() - self.last_weather_realtime_check > WEATHER_INTERVAL_REALTIME:
+        self.logger.info('refreshing weather realtime data...')
         try:
-            one_hour_out = (datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(hours=1)).isoformat()
-            CLIMACELL_PARAMS['end_time'] = one_hour_out
-            res = requests.get(CLIMACELL_NOWCAST, timeout=1, params=CLIMACELL_PARAMS)
+            res = requests.get(CLIMACELL_REALTIME, timeout=1, params=CLIMACELL_PARAMS)
             if res.status_code == 200:
                 weather_raw = json.loads(res.text)
 
                 # basics
                 now_dt = datetime.datetime.now(tz=get_localzone())
-                sunrise_dt = datetime.datetime.fromisoformat(weather_raw[0]['sunrise']['value'].replace('Z', '+00:00')).astimezone(get_localzone())
-                sunset_dt = datetime.datetime.fromisoformat(weather_raw[0]['sunset']['value'].replace('Z', '+00:00')).astimezone(get_localzone())
-                is_night = now_dt < sunrise_dt or now_dt > sunset_dt
+                sunrise_dt = datetime.datetime.fromisoformat(weather_raw['sunrise']['value'].replace('Z', '+00:00')).astimezone(get_localzone())
+                sunset_dt = datetime.datetime.fromisoformat(weather_raw['sunset']['value'].replace('Z', '+00:00')).astimezone(get_localzone())
+                is_night = now_dt < sunrise_dt or now_dt > sunset_dt 
 
-                icon = WEATHER_ICONS_MAP['day' if not is_night else 'night'][weather_raw[0]['weather_code']['value']]
+                icon = WEATHER_ICONS_MAP['day' if not is_night else 'night'][weather_raw['weather_code']['value']]
 
                 # temp/feels like
-                temp = int(weather_raw[0]['temp']['value'])
-                feels_like = int(weather_raw[0]['feels_like']['value'])
+                temp = int(weather_raw['temp']['value'])
+                feels_like = int(weather_raw['feels_like']['value'])
 
                 change_symbol = "+" if feels_like > temp else "-"
                 margin = abs(temp - feels_like)
@@ -111,36 +112,12 @@ class Delphi:
 
                 self.logger.debug("feels like margin of %s, displaying %s" % (margin, feels_like_indicator))
 
-                # next hour status 
-                current = weather_raw[0]['weather_code']['value']
-                inflections = []
-                prev = current
-                base_time = datetime.datetime.fromisoformat(weather_raw[0]['observation_time']['value'].replace('Z', '+00:00'))
-                for idx, interval in enumerate(weather_raw):
-                    if not interval['weather_code']['value'] == prev:
-                        compare_time = datetime.datetime.fromisoformat(interval['observation_time']['value'].replace('Z', '+00:00'))
-                        diff_time = compare_time - base_time
-                        inflections.append({
-                            'code': interval['weather_code']['value'],
-                            'mins_from_prev': diff_time.seconds // 60
-                        })
-                        prev = interval['weather_code']['value']
-                        base_time = compare_time
-
-                if inflections:
-                    # clear for 20 mins, then mostly clear for 20 mins, then mostly clear for 20 mins, then mostly clear
-                    state = "%s" % WEATHER_CODES_TEXT[current]
-                    for inflection in inflections:
-                        state = state + " for %s mins, then %s" % (inflection['mins_from_prev'], WEATHER_CODES_TEXT[inflection['code']])
-                else:
-                    state = "%s for the hour" % WEATHER_CODES_TEXT[current]
-
                 # high/low, is this even in the api?
-                high = 90 #int(weather_raw[0]['weather_code']['value'])
-                low = 70 #int(weather_raw[0]['weather_code']['value'])
+                high = 90 #int(weather_raw['weather_code']['value'])
+                low = 70 #int(weather_raw['weather_code']['value'])
 
                 # humidity
-                dewpoint = int(weather_raw[0]['dewpoint']['value'])
+                dewpoint = int(weather_raw['dewpoint']['value'])
                 if dewpoint <= 55:
                     humidity = 'low'
                 elif dewpoint < 65:
@@ -150,10 +127,10 @@ class Delphi:
 
                 if is_night:
                     sun_next = 'rise'
-                    sun_time_iso = weather_raw[0]['sunrise']['value']
+                    sun_time_iso = weather_raw['sunrise']['value']
                 else:
                     sun_next = 'set'
-                    sun_time_iso = weather_raw[0]['sunset']['value']
+                    sun_time_iso = weather_raw['sunset']['value']
                 sun_dt = datetime.datetime.fromisoformat(sun_time_iso.replace('Z', '+00:00')).astimezone(get_localzone())
                 sun_time = sun_dt.strftime("%I:%M")
 
@@ -161,8 +138,8 @@ class Delphi:
                     sun_time = sun_time[1:]
 
                 # wind
-                wind_speed = int(weather_raw[0]['wind_speed']['value'])
-                bearing = weather_raw[0]['wind_direction']['value']
+                wind_speed = int(weather_raw['wind_speed']['value'])
+                bearing = weather_raw['wind_direction']['value']
                 if bearing > 348.75 or bearing <= 33.75:
                     wind_direction = 'N'
                 elif bearing > 33.75 and bearing <= 78.75:
@@ -181,7 +158,7 @@ class Delphi:
                     wind_direction = 'NW'
 
                 # air quality
-                aqi = weather_raw[0]['epa_aqi']['value']
+                aqi = weather_raw['epa_aqi']['value']
                 if aqi <= 50:
                     air_quality = 'good'
                     air_quality_color = 'green'
@@ -202,47 +179,106 @@ class Delphi:
                     air_quality_color = 'maroon'
                 
                 # pollen
-                tree_pollen = weather_raw[0]['pollen_tree']['value']
+                tree_pollen = weather_raw['pollen_tree']['value']
                 tree_pollen = round(tree_pollen) if tree_pollen is not None else 0
                 tree_pollen_color = POLLEN_COLOR_SCALE[tree_pollen]
 
-                weed_pollen = weather_raw[0]['pollen_weed']['value']
+                weed_pollen = weather_raw['pollen_weed']['value']
                 weed_pollen = round(weed_pollen) if weed_pollen is not None else 0
                 weed_pollen_color = POLLEN_COLOR_SCALE[weed_pollen]
 
-                grass_pollen = weather_raw[0]['pollen_grass']['value']
+                grass_pollen = weather_raw['pollen_grass']['value']
                 grass_pollen = round(grass_pollen) if grass_pollen is not None else 0
                 grass_pollen_color = POLLEN_COLOR_SCALE[grass_pollen]
 
-                weather = {
-                    'temp': temp,
-                    'is_night': is_night,
-                    'icon': icon,
-                    'feels_like': feels_like,
-                    'feels_like_indicator': feels_like_indicator,
-                    'state': state,
-                    'high': high,
-                    'low': low,
-                    'dewpoint': dewpoint,
-                    'humidity': humidity,
-                    'sun_time': sun_time,
-                    'sun_next': sun_next,
-                    'wind_speed': wind_speed,   
-                    'wind_direction': wind_direction,
-                    'air_quality': air_quality,
-                    'air_quality_color': air_quality_color,
-                    'tree_pollen_color': tree_pollen_color,
-                    'weed_pollen_color': weed_pollen_color,
-                    'grass_pollen_color': grass_pollen_color
-                }
+                # for use in generating forecast state in nowcast
+                current_state = weather_raw['weather_code']['value']
 
-                self.logger.info("successfully fetched new weather, current time: %s" % weather_raw[0]['observation_time']['value'])
+                realtime_check = True
+
+                self.logger.info("successfully fetched new weather realtime, current time: %s" % weather_raw['observation_time']['value'])
+            else:
+                raise RequestException("API response: %s: %s" % (res.status_code, res.text))
         except Exception as e:
-            self.logger.warning("failed to fetch weather, guess we'll try next time", exc_info=True)
+            self.logger.warning("failed to fetch weather realtime, guess we'll try next time", exc_info=True)
 
         # even if it fails, we cant retry every tick or climacell will be mad 
         # at us for going over the rate limit by 900% again
-        self.last_weather_check = time.time()
+        self.last_weather_realtime_check = time.time()
+
+    if time.time() - self.last_weather_forecast_check > WEATHER_INTERVAL_FORECAST:
+        self.logger.info('refreshing weather forecast data...')
+        try:
+            one_hour_out = (datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(hours=1)).isoformat()
+            params = copy.deepcopy(CLIMACELL_PARAMS)
+            params['end_time'] = one_hour_out
+            params['timestep'] = 5
+            res = requests.get(CLIMACELL_NOWCAST, timeout=1, params=params)
+            if res.status_code == 200:
+                weather_raw = json.loads(res.text)
+
+                # next hour status 
+                current = current_state
+                inflections = []
+                prev = current
+                base_time = datetime.datetime.fromisoformat(weather_raw[0]['observation_time']['value'].replace('Z', '+00:00'))
+                for idx, interval in enumerate(weather_raw):
+                    if not interval['weather_code']['value'] == prev:
+                        compare_time = datetime.datetime.fromisoformat(interval['observation_time']['value'].replace('Z', '+00:00'))
+                        diff_time = compare_time - base_time
+                        inflections.append({
+                            'code': interval['weather_code']['value'],
+                            'mins_from_prev': diff_time.seconds // 60
+                        })
+                        prev = interval['weather_code']['value']
+                        base_time = compare_time
+
+                if inflections:
+                    # clear for 20 mins, then mostly clear for 20 mins, then mostly clear for 20 mins, then mostly clear
+                    forecast_state = "%s" % WEATHER_CODES_TEXT[current]
+                    for inflection in inflections:
+                        if int(inflection['mins_from_prev']) > 0:
+                            forecast_state = forecast_state + " for %s mins, then %s" % (inflection['mins_from_prev'], WEATHER_CODES_TEXT[inflection['code']])
+                        else:
+                            forecast_state = forecast_state + ", then %s" % WEATHER_CODES_TEXT[inflection['code']]
+                else:
+                    forecast_state = "%s for the hour" % WEATHER_CODES_TEXT[current]
+
+                self.logger.info("successfully fetched new weather forecast, current time: %s" % weather_raw[0]['observation_time']['value'])
+            else:
+                raise RequestException("API response: %s: %s" % (res.status_code, res.text))
+        except Exception as e:
+            self.logger.warning("failed to fetch weather forecast, guess we'll try next time", exc_info=True)
+
+        self.last_weather_forecast_check = time.time()
+
+
+    if realtime_check:
+        # if for some reason we get realtime but we're not able to get a forecast timeline
+        if forecast_state is None:
+            forecast_state = WEATHER_CODES_TEXT[current_state]
+
+        weather = {
+            'temp': temp,
+            'is_night': is_night,
+            'icon': icon,
+            'feels_like': feels_like,
+            'feels_like_indicator': feels_like_indicator,
+            'state': forecast_state,
+            'high': high,
+            'low': low,
+            'dewpoint': dewpoint,
+            'humidity': humidity,
+            'sun_time': sun_time,
+            'sun_next': sun_next,
+            'wind_speed': wind_speed,   
+            'wind_direction': wind_direction,
+            'air_quality': air_quality,
+            'air_quality_color': air_quality_color,
+            'tree_pollen_color': tree_pollen_color,
+            'weed_pollen_color': weed_pollen_color,
+            'grass_pollen_color': grass_pollen_color
+        }
 
     return weather
 
@@ -278,7 +314,33 @@ class Delphi:
     return ambient
 
   def calendar_updater(self):
-    pass
+    events = None
+    if time.time() - self.last_calendar_update > BACKGROUND_INTERVAL:
+        self.logger.info('updating calendars...')
+        events = []
+
+        try:
+            for cal in CALENDARS:
+                found_events = None
+                if cal['day'] == 'tomorrow':
+                    found_events = get_calendar_events_tomorrow(cal['url'])
+                else:
+                    found_events = get_calendar_events_today(cal['url'])
+
+                for ev in found_events:
+                    events.append({
+                        'type': cal['type'],
+                        'title': ev + (" Tomorrow" if cal['day'] == 'tomorrow' else "")
+                    })
+
+            self.last_calendar_update = time.time()
+
+            self.logger.info("got new calendar events, set last check time to %s" % self.last_calendar_update)
+        except Exception as e:
+            self.logger.warning("failed to update calendars, guess we'll try next tick")
+            self.logger.warning(e)
+
+    return events
 
   def background_updater(self):
     SCREEN_WIDTH = 480
@@ -318,7 +380,7 @@ class Delphi:
 
     return background_details
 
-  def draw_screen(self, weather, ambient, background):
+  def draw_screen(self, weather, ambient, background, events):
     text_color = (255, 255, 255)
     if background is not None:
         self.screen.blit(background['image'], (background['offset'][0], background['offset'][1]))
@@ -329,8 +391,14 @@ class Delphi:
     if now_time[0] == "0":
         now_time = now_time[1:]
 
-    header_shadowed(self.screen, now_time, (242, 132), 210, text_color)
-    header_shadowed(self.screen, now_date, (242, 232), 45, text_color)
+    header_shadowed(self.screen, now_time, (242, 152), 210, text_color)
+    header_shadowed(self.screen, now_date, (242, 252), 45, text_color)
+
+    if events is not None:
+        ypos = 300
+        for event in events:
+            fa_prefixed_text_shadowed(self.screen, EVENTS_TYPE_FA_ICONS[event['type']], event['title'], (240, ypos), 25, text_color)
+            ypos = ypos + 30
 
     if weather is not None:
         # main
@@ -403,6 +471,7 @@ class Delphi:
     weather = None
     ambient = None
     background_details = None
+    events = None
 
     while self.alive:
       for event in pygame.event.get():
@@ -425,6 +494,9 @@ class Delphi:
       if new_weather is not None:
         weather = new_weather
 
+      new_events = self.calendar_updater()
+      if new_events is not None:
+        events = new_events
       
       new_ambient = self.ambient_updater()
       if new_ambient is not None:
@@ -434,7 +506,7 @@ class Delphi:
       if new_bg is not None:
         background_details = new_bg
 
-      self.draw_screen(weather, ambient, background_details)
+      self.draw_screen(weather, ambient, background_details, events)
 
       time.sleep(1)
 
