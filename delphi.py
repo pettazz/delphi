@@ -83,6 +83,7 @@ class Delphi:
     weather = None
     forecast_state = None
     realtime_check = False
+    forecast_check = False
 
     if time.time() - self.last_weather_realtime_check > WEATHER_INTERVAL_REALTIME:
         self.logger.info('refreshing weather realtime data...')
@@ -213,17 +214,23 @@ class Delphi:
             params = copy.deepcopy(CLIMACELL_PARAMS)
             params['end_time'] = one_hour_out
             params['timestep'] = 5
+            params['fields'] = 'weather_code'
             res = requests.get(CLIMACELL_NOWCAST, timeout=1, params=params)
             if res.status_code == 200:
                 weather_raw = json.loads(res.text)
 
                 # next hour status 
-                current = current_state
+                if realtime_check:
+                    current = current_state
+                elif self.weather is not None:
+                    current = self.weather['current_state']
+                else:
+                    current = weather_raw[0]['weather_code']['value']
                 inflections = []
                 prev = current
                 base_time = datetime.datetime.fromisoformat(weather_raw[0]['observation_time']['value'].replace('Z', '+00:00'))
                 for idx, interval in enumerate(weather_raw):
-                    if not interval['weather_code']['value'] == prev:
+                    if idx > 0 and not interval['weather_code']['value'] == prev:
                         compare_time = datetime.datetime.fromisoformat(interval['observation_time']['value'].replace('Z', '+00:00'))
                         diff_time = compare_time - base_time
                         inflections.append({
@@ -244,6 +251,8 @@ class Delphi:
                 else:
                     forecast_state = "%s for the hour" % WEATHER_CODES_TEXT[current]
 
+                forecast_check = True
+
                 self.logger.info("successfully fetched new weather forecast, current time: %s" % weather_raw[0]['observation_time']['value'])
             else:
                 raise RequestException("API response: %s: %s" % (res.status_code, res.text))
@@ -252,19 +261,14 @@ class Delphi:
 
         self.last_weather_forecast_check = time.time()
 
-
     if realtime_check:
-        # if for some reason we get realtime but we're not able to get a forecast timeline
-        if forecast_state is None:
-            forecast_state = WEATHER_CODES_TEXT[current_state]
-
         weather = {
             'temp': temp,
             'is_night': is_night,
             'icon': icon,
             'feels_like': feels_like,
             'feels_like_indicator': feels_like_indicator,
-            'state': forecast_state,
+            'current_state': current_state,
             'high': high,
             'low': low,
             'dewpoint': dewpoint,
@@ -279,6 +283,13 @@ class Delphi:
             'weed_pollen_color': weed_pollen_color,
             'grass_pollen_color': grass_pollen_color
         }
+    else:
+        weather = self.weather
+
+    if forecast_check:
+        weather['state'] = forecast_state
+    else:
+        weather['state'] = self.weather['state'] if self.weather else current_state
 
     return weather
 
@@ -315,7 +326,7 @@ class Delphi:
 
   def calendar_updater(self):
     events = None
-    if time.time() - self.last_calendar_update > BACKGROUND_INTERVAL:
+    if time.time() - self.last_calendar_update > CALENDAR_INTERVAL:
         self.logger.info('updating calendars...')
         events = []
 
@@ -380,10 +391,10 @@ class Delphi:
 
     return background_details
 
-  def draw_screen(self, weather, ambient, background, events):
+  def draw_screen(self):
     text_color = (255, 255, 255)
-    if background is not None:
-        self.screen.blit(background['image'], (background['offset'][0], background['offset'][1]))
+    if self.background_details is not None:
+        self.screen.blit(self.background_details['image'], (self.background_details['offset'][0], self.background_details['offset'][1]))
 
     now_time = time.strftime("%I:%M")
     now_date = time.strftime("%A, %B %-d")
@@ -394,13 +405,14 @@ class Delphi:
     header_shadowed(self.screen, now_time, (242, 152), 210, text_color)
     header_shadowed(self.screen, now_date, (242, 252), 45, text_color)
 
-    if events is not None:
+    if self.events is not None:
         ypos = 300
-        for event in events:
+        for event in self.events:
             fa_prefixed_text_shadowed(self.screen, EVENTS_TYPE_FA_ICONS[event['type']], event['title'], (240, ypos), 25, text_color)
             ypos = ypos + 30
 
-    if weather is not None:
+    if self.weather is not None:
+        weather = self.weather
         # main
         fa_text_shadowed(self.screen, weather['icon'], (175, 507), 90, text_color)
         header_shadowed(self.screen, str(weather['temp']) + "°", (305, 510), 100, text_color)
@@ -461,17 +473,17 @@ class Delphi:
         fa_text_shadowed(self.screen, 'industry', (324, 680), 20, text_color, "left")
         fa_text_shadowed(self.screen, 'dot-circle', (347, 680), 20, COLOR_RGB[weather['air_quality_color']], "left")
 
-    if ambient is not None:
+    if self.ambient is not None:
         fa_text_shadowed(self.screen, 'microchip', (170, 733), 20, text_color, "left")
-        body_text_shadowed(self.screen, "%s° /  %s%%" % (ambient['temperature'], ambient['humidity']), (200, 730), 25, text_color)
+        body_text_shadowed(self.screen, "%s° /  %s%%" % (self.ambient['temperature'], self.ambient['humidity']), (200, 730), 25, text_color)
         
     pygame.display.flip()
 
   def runner(self):
-    weather = None
-    ambient = None
-    background_details = None
-    events = None
+    self.weather = None
+    self.ambient = None
+    self.background_details = None
+    self.events = None
 
     while self.alive:
       for event in pygame.event.get():
@@ -492,21 +504,21 @@ class Delphi:
 
       new_weather = self.weather_updater()
       if new_weather is not None:
-        weather = new_weather
+        self.weather = new_weather
 
       new_events = self.calendar_updater()
       if new_events is not None:
-        events = new_events
+        self.events = new_events
       
       new_ambient = self.ambient_updater()
       if new_ambient is not None:
-          ambient = new_ambient
+          self.ambient = new_ambient
           
       new_bg = self.background_updater()
       if new_bg is not None:
-        background_details = new_bg
+        self.background_details = new_bg
 
-      self.draw_screen(weather, ambient, background_details, events)
+      self.draw_screen()
 
       time.sleep(1)
 
