@@ -8,8 +8,6 @@ import json
 import random
 import copy
 
-import git 
-import hupper
 import requests
 from requests.exceptions import RequestException
 from tzlocal import get_localzone
@@ -31,7 +29,6 @@ except NotImplementedError:
 from statictools import * 
 
 FULLSCREEN_MODE = 0
-GIT_REFRESH_INTERVAL = 300
 
 class Delphi:
   def __init__(self):
@@ -66,11 +63,8 @@ class Delphi:
         self.quitter()
     pygame.mouse.set_visible(False)
 
-    self.git_repo = git.Repo(pathlib.Path(__file__).parent.absolute())
-
     self.last_weather_forecast_check = 0
     self.last_weather_realtime_check = 0
-    self.last_git_check = 0
     self.last_background_update = 0
     self.last_calendar_update = 0
     if DHT_SUPPORT:
@@ -496,12 +490,6 @@ class Delphi:
                   self.last_background_update = 0
                   self.logger.info('next background...')
 
-      if time.time() - self.last_git_check > GIT_REFRESH_INTERVAL:
-        self.logger.info("updating git repo...")
-        self.git_repo.remotes.origin.pull()
-        self.last_git_check = time.time()
-        self.logger.info("set last git pull to %s" % self.last_git_check)
-
       new_weather = self.weather_updater()
       if new_weather is not None:
         self.weather = new_weather
@@ -536,15 +524,6 @@ class Delphi:
     pygame.quit()
     sys.exit()
 
-def main():
-  reloader = hupper.start_reloader('delphi.main')
-  reloader.watch_files([
-    'statictools.py',
-    'assets/*'
-  ])
-
+if __name__ == "__main__":
   d = Delphi()
   d.runner()
-
-if __name__ == "__main__":
-  main()
