@@ -1,13 +1,13 @@
-pygame
-GitPython
-hupper
-watchdog
-fontawesome
-requests
-pyfiglet
-pytz
-tzlocal
-ics
 arrow
-adafruit-circuitpython-dht
-RPi.GPIO
+fontawesome
+ics
+methodtools
+pyfiglet
+pygame
+pytz
+pyyaml
+requests
+tzlocal
+# uncomment only when running on raspi
+#RPi.GPIO
+#adafruit-circuitpython-dht
